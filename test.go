@@ -62,27 +62,140 @@ type apartment map[string]position
 var Apartment apartment = make(apartment, 0)
 
 var Test [9]string
+
 var Test1 [12]string
 
 type personInfo []Personinfo
 
 var PersonInfo personInfo = make(personInfo, 1)
 
-func main() {
+type personResult struct {
+	name   string
+	Result float64
+}
 
+var dataResultfloat []personResult
+
+// var jobCategory = make([]string, 6)
+var jobCategory = []string{"", "行政管理", "教师管理", "学生管理", "教务管理", "组织管理"}
+
+type JobRequire map[int64]require
+
+var jobRequire JobRequire = make(JobRequire, 0)
+
+func main() {
 	read(DataPath+"/"+DataName1, 1)
 	read(DataPath+"/"+DataName2, 2)
+	// 根据公式算出权值
+	handleWeight()
+	// fmt.Println(dataResult)
+	handleType()
 
+	sortPersonScore()
 	print()
 
 }
 
-func print() {
-	PersonInfo = PersonInfo[1:]
+func handleType() {
+	var i int64
+	var length int64 = int64(len(jobCategory))
+	for i = 1; i < length; i++ {
+		for j := 0; j < len(PersonInfo); j++ {
 
-	// fmt.Println(PersonInfo)
+			if jobRequire[i].knowledge >= PersonInfo[j].grade.knowledge && jobRequire[i].intelligence >= PersonInfo[j].grade.intelligence && jobRequire[i].strain >= PersonInfo[j].grade.strain && jobRequire[i].expression >= PersonInfo[j].grade.expression {
+				fmt.Println(PersonInfo[j], "********", "Type:", i)
+			}
+		}
+	}
+}
+
+func handleWeight() {
+	length := len(PersonInfo)
+	dataResult := make([]string, length)
+	dataResultfloat = make([]personResult, length)
+
+	for i := 0; i < length; i++ {
+		dataResult[i], dataResultfloat[i].name, dataResultfloat[i].Result = function(i)
+		// fmt.Println(dataResult[i], dataResultfloat[i])
+	}
+	sort(dataResultfloat)
+	// fmt.Println(dataResultfloat)
+	// fmt.Println(dataResultfloat, "********")
+	writedata("data2.txt", dataResult)
+
+}
+
+func sortPersonScore() {
+	length := len(PersonInfo)
+	for i := 0; i < length-1; i++ {
+		for j := i + 1; j < length; j++ {
+			if PersonInfo[i].score < PersonInfo[j].score {
+				PersonInfo[i].score, PersonInfo[j].score = PersonInfo[j].score, PersonInfo[i].score
+			}
+		}
+	}
+}
+
+func sort(data []personResult) {
+	length := len(data)
+	for i := 0; i < length-1; i++ {
+		for j := i + 1; j < length; j++ {
+			if data[i].Result < data[j].Result {
+				data[i].Result, data[j].Result = data[j].Result, data[i].Result
+			}
+		}
+	}
+
+}
+
+func function(i int) (string, string, float64) {
+	var data1 float64
+	data1 = function1(PersonInfo[i].grade.knowledge)
+	var data2 float64
+	data2 = function1(PersonInfo[i].grade.intelligence)
+	var data3 float64
+	data3 = function1(PersonInfo[i].grade.strain)
+	var data4 float64
+	data4 = function1(PersonInfo[i].grade.expression)
+	// fmt.Println(data1)
+	result := (float64(PersonInfo[i].score)/300.0*0.7 + (data1+data2+data3+data4)*0.25*0.3)
+
+	return fmt.Sprintf("%s %f\n", PersonInfo[i].name, result), PersonInfo[i].name, result
+}
+
+func function1(grade1 string) float64 {
+	var data float64
+	// fmt.Println(grade1)
+	switch grade1 {
+	case "A":
+		data = 1
+	case "B":
+		data = 0.75
+	case "C":
+		data = 0.5
+	case "D":
+		data = 0.25
+	}
+	// fmt.Println(data)
+	return data
+}
+
+func writedata(filename string, dataResultString []string) {
+	file, _ := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+	for _, v := range dataResultString {
+		file.WriteString(v)
+	}
+	defer file.Close()
+}
+
+func print() {
+	// fmt.Println(jobRequire)
+	// fmt.Println(dataResultfloat[0:10])
+
+	fmt.Println(PersonInfo[0:10])
 	// fmt.Println(Apartment)
-	fmt.Println("...........", Apartment["院部3"])
+	// fmt.Println(PersonInfo[0])
+	// fmt.Println("...........", Apartment["院部3"])
 	// var data1 string
 
 	// out := make([]byte, len(fmt.Sprintln(Apartment)))
@@ -171,6 +284,7 @@ func read(filename string, flag int) error {
 			}
 			// fmt.Println(Test1)
 			{
+
 				Hope.Situation.welfare = Test1[2]
 				Hope.Situation.condition = Test1[3]
 				Hope.Situation.intensity = Test1[4]
@@ -184,13 +298,17 @@ func read(filename string, flag int) error {
 				num, _ := strconv.ParseInt(Test1[1], 10, 64)
 				var posi position = make(position, 0)
 				posi[num] = *Hope
-
+				{
+					jobRequire[num] = Hope.Require
+				}
+				// fmt.Println(jobRequire)
 				Apartment[Test1[0]] = posi
 				// fmt.Println(Test1[1], Test1[0], Apartment[Test1[0]], "-----------------", posi)
 
 			}
 		}
 	}
+	PersonInfo = PersonInfo[1:]
 
 	defer file.Close()
 	return nil
