@@ -13,17 +13,20 @@ import (
 	"strings"
 )
 
+// 数据存放位置
 const (
 	DataPath  = "/mnt/golang/projects/src/shumo/data"
 	DataName1 = "test.txt"
 	DataName2 = "test2.txt"
 )
 
+// 志愿
 type Choice struct {
 	firstChoice  int64
 	secondChoice int64
 }
 
+// 能力分类
 type Grade struct {
 	knowledge    string
 	intelligence string
@@ -31,6 +34,7 @@ type Grade struct {
 	expression   string
 }
 
+// 用户数据存放格式
 type Personinfo struct {
 	name   string
 	score  int64
@@ -39,6 +43,7 @@ type Personinfo struct {
 	salary int64
 }
 
+// 部门基本要求
 type situation struct {
 	welfare      string
 	condition    string
@@ -49,39 +54,85 @@ type situation struct {
 
 type require Grade
 
+// 期望人员能力
 type hope struct {
 	Situation situation
 	Require   require
 	salary    int64
 }
 
+// 各部门期望人员能力
 type position map[int64]hope
 
+// 部门全部数据
 type apartment map[string]position
 
+//
 var Apartment apartment = make(apartment, 0)
 
+//录入数据人员使用
 var Test [9]string
 
+//录入部门数据使用
 var Test1 [12]string
 
+//
 type personInfo []Personinfo
 
+//
 var PersonInfo personInfo = make(personInfo, 1)
 
+//
 type personResult struct {
 	name   string
 	Result float64
 }
 
+//
 var dataResultfloat []personResult
 
 // var jobCategory = make([]string, 6)
 var jobCategory = []string{"", "行政管理", "教师管理", "学生管理", "教务管理", "组织管理"}
 
+//
 type JobRequire map[int64]require
 
+//
 var jobRequire JobRequire = make(JobRequire, 0)
+
+// question 2 handler
+//person -> work
+const (
+	PersonNum = 10
+)
+
+const (
+	x1 float64 = 0.01
+	x2 float64 = 0.01
+	x3 float64 = 0.01
+)
+
+//wprk -> person
+const (
+	y1 float64 = 0.01
+	y2 float64 = 0.01
+	y3 float64 = 0.01
+	y4 float64 = 0.01
+)
+
+var a [10][10]float64
+var b [10][10]float64
+var c [10][10]float64
+
+type workType struct {
+	Name      string
+	Type      int64
+	Situation situation
+	Require   require
+	salary    int64
+}
+
+var WorkType []workType = make([]workType, 10)
 
 func main() {
 	read(DataPath+"/"+DataName1, 1)
@@ -92,8 +143,138 @@ func main() {
 	handleType()
 
 	sortPersonScore()
-	print()
 
+	// voluntyTable1()
+	// voluntyTable2()
+
+	// MaptoSlice()
+
+	handleQuestion2()
+
+	fmt.Println(WorkType)
+
+	// print()
+}
+
+func MaptoSlice() {
+	var i int64
+	// var length int64 = int64(len(PersonInfo))
+	fmt.Println(Apartment)
+	for x, v := range Apartment {
+		for y, val := range v {
+			WorkType[i].Name = x
+			WorkType[i].Type = y
+			WorkType[i].Require = val.Require
+			WorkType[i].Situation = val.Situation
+			WorkType[i].salary = val.salary
+			i++
+		}
+	}
+}
+
+func handleQuestion2() {
+	PersonInfo = PersonInfo[0:PersonNum]
+	personToWork()
+
+	// workToPerson()
+}
+
+func personToWork() {
+	// var length int64 = int64(len(PersonInfo))
+	fmt.Println(Apartment)
+	{
+		for i, v := range PersonInfo {
+			for j, value := range WorkType {
+				if value.salary > v.salary {
+					a[i][j] = 1
+				} else {
+					a[i][j] = 0
+				}
+			}
+		}
+	}
+
+	{
+		for i, v := range PersonInfo {
+			for j, value := range WorkType {
+				if v.choice.firstChoice == value.Type {
+					b[i][j] = 1
+				}
+				if v.choice.secondChoice == value.Type {
+					b[i][j] = 0.5
+				}
+			}
+		}
+	}
+
+	{
+		for i, _ := range PersonInfo {
+			for j, value := range WorkType {
+				c[i][j] = (ChineseToFloat(value.Situation.advancement) + ChineseToFloat(value.Situation.condition) + ChineseToFloat(value.Situation.furtherStudy) + ChineseToFloat(value.Situation.intensity) + ChineseToFloat(value.Situation.welfare)) / 5
+			}
+		}
+	}
+
+	fmt.Println(a, "\n", b, "\n", c, "\n")
+}
+
+func ChineseToFloat(data string) float64 {
+	switch data {
+	case "优":
+		return 1
+	case "中":
+		return 0.75
+	case "差":
+		return 0.5
+	case "多":
+		return 1
+	case "少":
+		return 0.5
+	default:
+		return 0
+	}
+}
+
+func workToPerson() {
+	{
+		for i, v := range PersonInfo {
+			for j, value := range WorkType {
+				if value.salary > v.salary {
+					a[i][j] = 1
+				} else {
+					a[i][j] = 0
+				}
+
+			}
+		}
+	}
+}
+
+func voluntyTable1() {
+	var i int64
+	var length int64 = int64(len(jobCategory))
+	for i = 1; i < length; i++ {
+		fmt.Println(jobCategory[i], "This is first")
+		for j := 0; j < len(PersonInfo); j++ {
+			if PersonInfo[j].choice.firstChoice == i {
+				fmt.Println(PersonInfo[j])
+			}
+		}
+	}
+
+}
+
+func voluntyTable2() {
+	var i int64
+	var length int64 = int64(len(jobCategory))
+	for i = 1; i < length; i++ {
+		fmt.Println(jobCategory[i], "This is second")
+		for j := 0; j < len(PersonInfo); j++ {
+			if PersonInfo[j].choice.secondChoice == i {
+				fmt.Println(PersonInfo[j])
+			}
+		}
+	}
 }
 
 func handleType() {
@@ -212,6 +393,7 @@ func read(filename string, flag int) error {
 	inputReader := bufio.NewReader(file)
 	// lineCounter := 0
 
+	var lengthi int64
 	for {
 		if flag == 1 {
 			// var posi position
@@ -284,7 +466,6 @@ func read(filename string, flag int) error {
 			}
 			// fmt.Println(Test1)
 			{
-
 				Hope.Situation.welfare = Test1[2]
 				Hope.Situation.condition = Test1[3]
 				Hope.Situation.intensity = Test1[4]
@@ -296,15 +477,30 @@ func read(filename string, flag int) error {
 				Hope.Require.expression = Test1[10]
 				Hope.salary, _ = strconv.ParseInt(Test1[11], 10, 64)
 				num, _ := strconv.ParseInt(Test1[1], 10, 64)
+
 				var posi position = make(position, 0)
+				if Apartment[Test1[0]] != nil {
+					posi = Apartment[Test1[0]]
+				}
+
+				WorkType[lengthi].Name = Test1[0]
+				WorkType[lengthi].Type = num
+				WorkType[lengthi].Require = Hope.Require
+				WorkType[lengthi].Situation = Hope.Situation
+				WorkType[lengthi].salary = Hope.salary
+				fmt.Println(lengthi)
+				if lengthi < 9 {
+					lengthi++
+				}
+
 				posi[num] = *Hope
 				{
 					jobRequire[num] = Hope.Require
 				}
 				// fmt.Println(jobRequire)
 				Apartment[Test1[0]] = posi
+				fmt.Println(Apartment, "***", Test1)
 				// fmt.Println(Test1[1], Test1[0], Apartment[Test1[0]], "-----------------", posi)
-
 			}
 		}
 	}
