@@ -107,17 +107,22 @@ const (
 )
 
 const (
-	x1 float64 = 0.1
-	x2 float64 = 0.2
-	x3 float64 = 0.7
+	z1 float64 = 0.5
+	z2 float64 = 0.5
+)
+
+const (
+	x1 float64 = 0.25
+	x2 float64 = 0.25
+	x3 float64 = 0.4
 )
 
 //wprk -> person
 const (
-	y1 float64 = 0.1
-	y2 float64 = 0.2
-	y3 float64 = 0.3
-	y4 float64 = 0.4
+	y1 float64 = 0.25
+	y2 float64 = 0.3
+	y3 float64 = 0.2
+	y4 float64 = 0.25
 )
 
 var a [10][10]float64
@@ -173,21 +178,21 @@ func HandlerR() {
 	}
 }
 
-func MaptoSlice() {
-	var i int64
-	// var length int64 = int64(len(PersonInfo))
-	// fmt.Println(Apartment)
-	for x, v := range Apartment {
-		for y, val := range v {
-			WorkType[i].Name = x
-			WorkType[i].Type = y
-			WorkType[i].Require = val.Require
-			WorkType[i].Situation = val.Situation
-			WorkType[i].salary = val.salary
-			i++
-		}
-	}
-}
+// func MaptoSlice() {
+// 	var i int64
+// 	// var length int64 = int64(len(PersonInfo))
+// 	// fmt.Println(Apartment)
+// 	for x, v := range Apartment {
+// 		for y, val := range v {
+// 			WorkType[i].Name = x
+// 			WorkType[i].Type = y
+// 			WorkType[i].Require = val.Require
+// 			WorkType[i].Situation = val.Situation
+// 			WorkType[i].salary = val.salary
+// 			i++
+// 		}
+// 	}
+// }
 
 func handleQuestion2() {
 	PersonInfo = PersonInfo[0:PersonNum]
@@ -387,9 +392,20 @@ func function(i int) (string, string, float64) {
 	var data4 float64
 	data4 = function1(PersonInfo[i].grade.expression)
 	// fmt.Println(data1)
-	result := (float64(PersonInfo[i].score)/300.0*0.7 + (data1+data2+data3+data4)*0.25*0.3)
+	result := (float64(PersonInfo[i].score)/300.0*z1 + (data1+data2+data3+data4)*0.25*z2)
 
 	return fmt.Sprintf("%s %f\n", PersonInfo[i].name, result), PersonInfo[i].name, result
+}
+
+func justGetSort() (result []float64) {
+	// fmt.Println(jobRequire)
+	result = make([]float64, 5)
+	for i := 0; i < 5; i++ {
+		result[i] = (function1(jobRequire[int64(i+1)].knowledge) + function1(jobRequire[int64(i+1)].intelligence) + function1(jobRequire[int64(i+1)].expression) + function1(jobRequire[int64(i+1)].strain)) / 4
+		fmt.Println(jobRequire[int64(i+1)])
+		fmt.Println(result)
+	}
+	return
 }
 
 func function1(grade1 string) float64 {
@@ -422,9 +438,98 @@ func print() {
 	// fmt.Println(dataResultfloat[0:10])
 
 	// fmt.Println(PersonInfo[0:10])
+
 	{
 		for _, v := range dataResultfloat[0:10] {
 			fmt.Printf("%s\t%0.3f", v.name, v.Result)
+			fmt.Println()
+		}
+	}
+
+	fmt.Println("a:\n")
+	{
+		for _, v := range a {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+
+	fmt.Println("b:\n")
+	{
+		for _, v := range b {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+
+	fmt.Println("c:\n")
+	{
+		for _, v := range c {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+
+	fmt.Println("a1:\n")
+	{
+		for _, v := range a1 {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+
+	fmt.Println("b1:\n")
+	{
+		for _, v := range b1 {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+
+	fmt.Println("c1:\n")
+	{
+		for _, v := range c1 {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+	fmt.Println("d1:\n")
+	{
+		for _, v := range d1 {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+
+	fmt.Println("RESULTA:\n")
+	{
+		for _, v := range ResultA {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
+	fmt.Println("RESULTB:\n")
+	{
+		for _, v := range ResultB {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
 			fmt.Println()
 		}
 	}
@@ -443,7 +548,8 @@ func print() {
 	// fmt.Println("a1:\n", a1, "\n", "b1:\n", b1, "\n", "c1:\n", c1, "\n", "d1:\n", d1)
 	// fmt.Println(a, "\n", b, "\n", c, "\n")
 	// fmt.Println(ResultC)
-	fmt.Println()
+
+	fmt.Println("Result:\n")
 	{
 		for _, v := range ResultC {
 			for _, val := range v {
@@ -452,6 +558,10 @@ func print() {
 			fmt.Println()
 		}
 	}
+
+	fmt.Println()
+	fmt.Println(jobRequire)
+	fmt.Println(justGetSort())
 }
 
 func read(filename string, flag int) error {
