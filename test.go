@@ -107,22 +107,27 @@ const (
 )
 
 const (
-	x1 float64 = 0.01
-	x2 float64 = 0.01
-	x3 float64 = 0.01
+	x1 float64 = 0.1
+	x2 float64 = 0.2
+	x3 float64 = 0.7
 )
 
 //wprk -> person
 const (
-	y1 float64 = 0.01
-	y2 float64 = 0.01
-	y3 float64 = 0.01
-	y4 float64 = 0.01
+	y1 float64 = 0.1
+	y2 float64 = 0.2
+	y3 float64 = 0.3
+	y4 float64 = 0.4
 )
 
 var a [10][10]float64
 var b [10][10]float64
 var c [10][10]float64
+
+var a1 [10][10]float64
+var b1 [10][10]float64
+var c1 [10][10]float64
+var d1 [10][10]float64
 
 type workType struct {
 	Name      string
@@ -134,13 +139,16 @@ type workType struct {
 
 var WorkType []workType = make([]workType, 10)
 
+var ResultA [10][10]float64
+var ResultB [10][10]float64
+var ResultC [10][10]float64
+
 func main() {
 	read(DataPath+"/"+DataName1, 1)
 	read(DataPath+"/"+DataName2, 2)
 	// 根据公式算出权值
 	handleWeight()
-	// fmt.Println(dataResult)
-	handleType()
+	// handleType()
 
 	sortPersonScore()
 
@@ -151,15 +159,24 @@ func main() {
 
 	handleQuestion2()
 
-	fmt.Println(WorkType)
+	print()
+}
 
-	// print()
+func HandlerR() {
+	length := len(a)
+	for i := 0; i < length; i++ {
+		for j := 0; j < length; j++ {
+			ResultA[i][j] = a[i][j]*x1 + b[i][j]*x2 + c[i][j]*x3
+			ResultB[i][j] = a1[i][j]*y1 + b1[i][j]*y2 + c1[i][j]*y3 + d1[i][j]*y4
+			ResultC[i][j] = ResultA[i][j] + ResultB[i][j]
+		}
+	}
 }
 
 func MaptoSlice() {
 	var i int64
 	// var length int64 = int64(len(PersonInfo))
-	fmt.Println(Apartment)
+	// fmt.Println(Apartment)
 	for x, v := range Apartment {
 		for y, val := range v {
 			WorkType[i].Name = x
@@ -176,12 +193,14 @@ func handleQuestion2() {
 	PersonInfo = PersonInfo[0:PersonNum]
 	personToWork()
 
-	// workToPerson()
+	workToPerson()
+
+	HandlerR()
 }
 
 func personToWork() {
 	// var length int64 = int64(len(PersonInfo))
-	fmt.Println(Apartment)
+	// fmt.Println(Apartment)
 	{
 		for i, v := range PersonInfo {
 			for j, value := range WorkType {
@@ -215,7 +234,6 @@ func personToWork() {
 		}
 	}
 
-	fmt.Println(a, "\n", b, "\n", c, "\n")
 }
 
 func ChineseToFloat(data string) float64 {
@@ -240,28 +258,57 @@ func workToPerson() {
 		for i, v := range PersonInfo {
 			for j, value := range WorkType {
 				if value.salary > v.salary {
-					a[i][j] = 1
+					a1[i][j] = 1
 				} else {
-					a[i][j] = 0
+					a1[i][j] = 0
 				}
 
 			}
 		}
 	}
+
+	{
+		for i, v := range PersonInfo {
+			for j, value := range WorkType {
+				if v.choice.firstChoice == value.Type {
+					b1[i][j] = 1
+				}
+				if v.choice.secondChoice == value.Type {
+					b1[i][j] = 0.5
+				}
+			}
+		}
+	}
+
+	{
+		for i, v := range PersonInfo {
+			for j, _ := range WorkType {
+				c1[i][j] = float64(v.score) / 300.0
+			}
+		}
+	}
+
+	{
+		for i, v := range PersonInfo {
+			for j, _ := range WorkType {
+				d1[i][j] = (function1(v.grade.knowledge) + function1(v.grade.intelligence) + function1(v.grade.expression) + function1(v.grade.strain)) * 0.25
+			}
+		}
+	}
+
 }
 
 func voluntyTable1() {
 	var i int64
 	var length int64 = int64(len(jobCategory))
 	for i = 1; i < length; i++ {
-		fmt.Println(jobCategory[i], "This is first")
+		// fmt.Println(jobCategory[i], "This is first")
 		for j := 0; j < len(PersonInfo); j++ {
 			if PersonInfo[j].choice.firstChoice == i {
-				fmt.Println(PersonInfo[j])
+				// fmt.Println(PersonInfo[j])
 			}
 		}
 	}
-
 }
 
 func voluntyTable2() {
@@ -322,10 +369,11 @@ func sort(data []personResult) {
 	for i := 0; i < length-1; i++ {
 		for j := i + 1; j < length; j++ {
 			if data[i].Result < data[j].Result {
-				data[i].Result, data[j].Result = data[j].Result, data[i].Result
+				data[i], data[j] = data[j], data[i]
 			}
 		}
 	}
+	// fmt.Println(data[0:10])
 
 }
 
@@ -373,16 +421,37 @@ func print() {
 	// fmt.Println(jobRequire)
 	// fmt.Println(dataResultfloat[0:10])
 
-	fmt.Println(PersonInfo[0:10])
+	// fmt.Println(PersonInfo[0:10])
+	{
+		for _, v := range dataResultfloat[0:10] {
+			fmt.Printf("%s\t%0.3f", v.name, v.Result)
+			fmt.Println()
+		}
+	}
 	// fmt.Println(Apartment)
 	// fmt.Println(PersonInfo[0])
 	// fmt.Println("...........", Apartment["院部3"])
 	// var data1 string
 
+	// fmt.Println(dataResult)
+
 	// out := make([]byte, len(fmt.Sprintln(Apartment)))
 	// iconv.Convert([]byte(fmt.Sprintln(Apartment)), out, "gb2312", "utf-8")
 	// fmt.Println(out)
 	// ioutil.WriteFile("out.txt", out, 0644)
+	//fmt.Println("\n\n\n\n\n\n\n\n", ResultC)
+	// fmt.Println("a1:\n", a1, "\n", "b1:\n", b1, "\n", "c1:\n", c1, "\n", "d1:\n", d1)
+	// fmt.Println(a, "\n", b, "\n", c, "\n")
+	// fmt.Println(ResultC)
+	fmt.Println()
+	{
+		for _, v := range ResultC {
+			for _, val := range v {
+				fmt.Printf("%0.3f \t ", val)
+			}
+			fmt.Println()
+		}
+	}
 }
 
 func read(filename string, flag int) error {
@@ -488,7 +557,7 @@ func read(filename string, flag int) error {
 				WorkType[lengthi].Require = Hope.Require
 				WorkType[lengthi].Situation = Hope.Situation
 				WorkType[lengthi].salary = Hope.salary
-				fmt.Println(lengthi)
+				// fmt.Println(lengthi)
 				if lengthi < 9 {
 					lengthi++
 				}
@@ -499,12 +568,15 @@ func read(filename string, flag int) error {
 				}
 				// fmt.Println(jobRequire)
 				Apartment[Test1[0]] = posi
-				fmt.Println(Apartment, "***", Test1)
+				// fmt.Println(Apartment, "***", Test1)
 				// fmt.Println(Test1[1], Test1[0], Apartment[Test1[0]], "-----------------", posi)
 			}
 		}
 	}
-	PersonInfo = PersonInfo[1:]
+
+	if flag == 1 {
+		PersonInfo = PersonInfo[1:]
+	}
 
 	defer file.Close()
 	return nil
